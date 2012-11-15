@@ -6,3 +6,4 @@ gem 'slim'
 gem 'json'
 gem "mongoid"
 gem "bson_ext"
+gem "hpricot"
