@@ -8,6 +8,7 @@ class Company
   field :website, type: String
   field :image_url, type: String
   field :source_url, type: String
+  field :coupon_list_url, type: String
   field :description, type: String
 
   embeds_many :coupons
