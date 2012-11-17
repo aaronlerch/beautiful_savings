@@ -4,6 +4,7 @@ gem 'rack'
 gem 'sinatra'
 gem 'slim'
 gem 'json'
-gem "mongoid"
+#gem "mongoid"
+gem "mongo"
 gem "bson_ext"
 gem "hpricot"

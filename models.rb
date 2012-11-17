@@ -1,24 +1,45 @@
-require 'mongoid'
+require 'json'
 
 class Company
-  include Mongoid::Document
-  field :name, type: String
-  field :full_address, type: String
-  field :phone_number, type: String
-  field :website, type: String
-  field :image_url, type: String
-  field :source_url, type: String
-  field :coupon_list_url, type: String
-  field :description, type: String
+  attr_accessor :name, 
+                :full_address, 
+                :phone_number, 
+                :website, 
+                :image_url, 
+                :source_url, 
+                :coupon_list_url, 
+                :description,
+                :coupons
 
-  embeds_many :coupons
+  def initialize
+    @coupons = []
+  end
+
+  def to_mongo
+    hash = {
+      :name => @name,
+      :full_address => @full_address,
+      :phone_number => @phone_number,
+      :website => @website,
+      :image_url => @image_url,
+      :source_url => @source_url,
+      :coupon_list_url => @coupon_list_url,
+      :description => @description,
+      :coupons => []
+    }
+
+    @coupons.each do |c|
+      hash[:coupons] << { 
+        :description => c.description, 
+        :restrictions => c.restrictions, 
+        :source_url => c.source_url
+      }
+    end
+
+    hash
+  end
 end
 
 class Coupon
-  include Mongoid::Document
-  field :description, type: String
-  field :restrictions, type: String
-  field :source_url, type: String
-
-  embedded_in :company
+  attr_accessor :description, :restrictions, :source_url
 end

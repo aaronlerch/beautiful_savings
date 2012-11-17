@@ -3,7 +3,6 @@
 require 'open-uri'
 require 'hpricot'
 require_relative './helpers.rb'
-require_relative '../models.rb'
 require_relative './coupon_processor.rb'
 
 class CompanyProcessor
@@ -77,30 +76,38 @@ class CompanyProcessor
   def self.process_company_page(page)
     companies = []
     list_items = page.search('div.lpsyslistall div.cgeyixcacaidb')
+
     list_items.each do |list_item|
-      company = Company.new
+      company = {}
       
-      title = list_item.search('h2.diruptitle a').first
-      company.name = title.inner_text
-      company.source_url = "#{ROOT_URL}#{title.get_attribute(:href)}"
+      begin
+        title = list_item.search('h2.diruptitle a').first
+        company[:name] = title.inner_text
+        company[:source_url] = "#{ROOT_URL}#{title.get_attribute(:href)}"
 
-      # Get the link to the coupon page
-      coupon_link = list_item.search('a[@href^="acctcoupons"]').first
-      if !coupon_link.nil?
-        company.coupon_list_url = "#{ROOT_URL}#{coupon_link.get_attribute(:href)}"
+        # Get the link to the coupon page, trying the two variations we've seen
+        coupon_link = list_item.search('a[@href*="coupon"]').first
+
+        if !coupon_link.nil?
+          company[:coupon_list_url] = "#{ROOT_URL}#{coupon_link.get_attribute(:href)}"
+        end
+
+        address_area = list_item.search('span.dirupheader')
+        address_items = address_area.search('font')
+        company[:full_address] = address_items[0].inner_text
+        company[:phone_number] = address_items[1].inner_text
+
+        company[:description] = list_item.search('span.dirupheader + div').inner_text
+        # Initialize the coupons array here
+        company[:coupons] = []
+        CouponProcessor.process_coupons_for_company(company)
+        puts "Processed #{company[:coupons].count} coupons for company #{company[:name]}"
+        companies << company
+      rescue Exception => ex
+        abort(Helpers.get_error_string("Error retrieving company information", ex))
       end
-
-      address_area = list_item.search('span.dirupheader')
-      address_items = address_area.search('font')
-      company.full_address = address_items[0].inner_text
-      company.phone_number = address_items[1].inner_text
-
-      company.description = list_item.search('span.dirupheader + div').inner_text
-      company.coupons = []
-      CouponProcessor.process_coupons_for_company(company)
-      puts "Processed #{company.coupons.count} coupons for company #{company.name}"
-      companies << company
     end
+
     return companies
   end
 end

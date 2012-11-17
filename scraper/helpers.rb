@@ -10,6 +10,7 @@ class Helpers
   end
 
   def should_process(url)
+    return false if url.nil?
     canonical_url = url.downcase
     
     if @processed_urls.keys.count >= 10000

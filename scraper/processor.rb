@@ -36,7 +36,6 @@ class Processor
     category_hash = { "Automobile" => "Directory-pc13444.11312-Automobile.html" }
 
     category_hash.each do |name, url|
-      # Process each url of companies, expanding out paging
       companies = CompanyProcessor.process_url_of_companies("#{ROOT_URL}#{url}", true)
       all_companies.concat companies
     end
