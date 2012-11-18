@@ -10,13 +10,25 @@ unless Kernel.respond_to?(:require_relative)
 end
 
 require_relative './processor.rb'
-require_relative '../db_config.rb'
+require_relative '../database.rb'
 
 ROOT_URL = "http://www.coupons4indy.com/"
 
+# TODO: record how long this script takes to run, and spit it out at the end
+
 # Configure the Mongo connection
-Configurator.development
+Database.configure :development
 
 companies = Processor.new.process_all
+puts "Retrieved #{companies.count} companies - storing"
 
-puts "Retrieved #{companies.count} companies!"
+# Clear the existing collection, and recreate it
+Database.collection.remove
+
+# Add each company
+companies.each do |c|
+  Database.collection.insert c
+end
+
+# Done!
+puts "Done!"

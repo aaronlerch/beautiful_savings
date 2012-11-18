@@ -32,8 +32,8 @@ class Processor
   def process_categories(category_hash)
     all_companies = []
 
-    puts "Using category 'Automobile' for TESTING only!!"
-    category_hash = { "Automobile" => "Directory-pc13444.11312-Automobile.html" }
+    #puts "Using category 'Automobile' for TESTING only!!"
+    #category_hash = { "Automobile" => "Directory-pc13444.11312-Automobile.html" }
 
     category_hash.each do |name, url|
       companies = CompanyProcessor.process_url_of_companies("#{ROOT_URL}#{url}", true)
