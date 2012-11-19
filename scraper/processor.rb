@@ -10,12 +10,10 @@ class Processor
     categories = {}
     directory_url = "#{ROOT_URL}Site.Directories.html"
 
-    puts "Processing categories"
-
     begin
       category_html = Hpricot(Helpers.instance.sanitize_contents(open(directory_url).read))
     rescue Exception => ex
-      abort(Helpers.get_error_string("Error accessing site directory at #{directory_url}", ex))
+      abort("Error accessing site directory at #{directory_url}:\n\n#{ex.message}\n\n#{ex.backtrace}")
     end
 
     category_html.search('td.dirparcats a').each do |cat_link_html|
@@ -24,22 +22,15 @@ class Processor
       categories[cat_text] = cat_url
     end
 
-    puts "Found #{categories.length} categories, processing"
-
-    process_categories(categories)
-  end
-
-  def process_categories(category_hash)
-    all_companies = []
-
-    #puts "Using category 'Automobile' for TESTING only!!"
-    #category_hash = { "Automobile" => "Directory-pc13444.11312-Automobile.html" }
-
-    category_hash.each do |name, url|
-      companies = CompanyProcessor.process_url_of_companies("#{ROOT_URL}#{url}", true)
-      all_companies.concat companies
+    if categories.empty?
+      abort("No categories were found ... that ain't good.")
     end
 
-    return all_companies
+    puts "Processing #{categories.length} categories"
+    #puts "Using category 'Automobile' for TESTING only!!"
+    #categories = { "Automobile" => "Directory-pc13444.11312-Automobile.html" }
+    categories.each do |name, suburl|
+      CompanyProcessor.process_url_of_companies("#{ROOT_URL}#{suburl}", true)
+    end
   end
 end

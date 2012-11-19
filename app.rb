@@ -1,5 +1,6 @@
 require 'bundler'
 Bundler.require
+require_relative './app_helpers'
 
 class App < Sinatra::Base
   set :root, File.dirname(__FILE__)

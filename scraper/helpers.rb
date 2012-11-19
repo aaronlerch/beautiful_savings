@@ -25,16 +25,23 @@ class Helpers
     end
   end
 
-  def write_error(message, ex)
-    puts(Helpers.get_error_string(message, ex))
+  def write_error(message, ex, data = {})
+    doc = {
+      :message => message,
+      :exception => {
+        :message => ex.message,
+        :backtrace => ex.backtrace
+      }
+    }
+
+    doc.merge! data
+
+    Database.errors.insert doc
+    puts "ERROR :: #{message}"
   end
 
   def sanitize_contents(contents)
     contents.encode!('UTF-16', 'UTF-8', :invalid => :replace, :replace => '')
     contents.encode!('UTF-8', 'UTF-16')
-  end
-
-  def self.get_error_string(message, ex)
-    "#{message}:\n#{ex.message}\n\n#{ex.backtrace}\n"
   end
 end

@@ -11,24 +11,21 @@ end
 
 require_relative './processor.rb'
 require_relative '../database.rb'
+require_relative '../app_helpers.rb'
 
 ROOT_URL = "http://www.coupons4indy.com/"
 
-# TODO: record how long this script takes to run, and spit it out at the end
+start = Time.now
 
 # Configure the Mongo connection
 Database.configure :development
 
-companies = Processor.new.process_all
-puts "Retrieved #{companies.count} companies - storing"
+Database.companies.remove
+Database.errors.remove
 
-# Clear the existing collection, and recreate it
-Database.collection.remove
+Processor.new.process_all
 
-# Add each company
-companies.each do |c|
-  Database.collection.insert c
-end
+finish = Time.now
 
 # Done!
-puts "Done!"
+puts "Done in #{finish - start} seconds"

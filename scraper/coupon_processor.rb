@@ -6,17 +6,24 @@ require_relative './helpers.rb'
 
 class CouponProcessor
   def self.process_coupons_for_company(company = {})
+    company[:coupons] = []
     return [] if !company.has_key? :coupon_list_url
     url = company[:coupon_list_url]
     return [] if !Helpers.instance.should_process(url)
-    puts "Processing coupons for #{url}"
     
     # TODO: not all coupon pages have the same structure - need to figure out 
     # the right structure for the "outliers".
     page = Hpricot(Helpers.instance.sanitize_contents(open(url).read))
     coupon_rows = page.search('div.cbghpgcicajge > table.lp > tr')
 
-    puts "Found #{coupon_rows.count} coupons"
+    if coupon_rows.empty?
+        doc = {
+          :message => "No coupons found for #{company[:name]}",
+          :url => company[:coupon_list_url]
+        }
+        Database.errors.insert doc
+        puts "No coupons found for #{company[:name]}!"
+    end
 
     coupon_rows.each do |row|
       begin

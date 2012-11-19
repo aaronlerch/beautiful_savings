@@ -5,8 +5,12 @@ class Database
     @@connection
   end
 
-  def self.collection
+  def self.companies
     connection.db(@@database_name).collection("companies")
+  end
+
+  def self.errors
+    connection.db(@@database_name).collection("errors")
   end
 
   def self.configure(env = :development)
