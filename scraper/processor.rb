@@ -17,7 +17,7 @@ class Processor
 
     abort("No global select list! (One can only dream.)") if root_html.nil?
 
-    root_html.search('option')[0..50].each do |company_option|
+    root_html.search('option').each do |company_option|
       option_value = company_option.get_attribute(:value)
       next if option_value.nil? or option_value.empty?
 
