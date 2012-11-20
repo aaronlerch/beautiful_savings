@@ -11,12 +11,12 @@ class CouponProcessor
     url = company[:coupon_list_url]
     return [] if !Helpers.instance.should_process(url)
     
-    # TODO: not all coupon pages have the same structure - need to figure out 
-    # the right structure for the "outliers".
     page = Hpricot(Helpers.instance.sanitize_contents(open(url).read))
-    coupon_rows = page.search('div.cbghpgcicajge > table.lp > tr')
 
-    if coupon_rows.empty?
+    # process all coupons based on the div.couponvalue div
+    coupon_divs = page.search('div.couponvalue')
+
+    if coupon_divs.empty?
         doc = {
           :message => "No coupons found for #{company[:name]}",
           :url => company[:coupon_list_url]
@@ -25,21 +25,31 @@ class CouponProcessor
         puts "No coupons found for #{company[:name]}!"
     end
 
-    coupon_rows.each do |row|
+    coupon_divs.each do |coupon_div|
       begin
-        coupon = {}
-        coupon[:description] = row.search('div.couponvalue').inner_text
-        coupon[:restrictions] = row.search('div.couponrestriction').inner_text
+        # walk back up the element's parent until we find the parent table (or we end)
+        parent_table = coupon_div
+        while not parent_table.name.nil? || parent_table.name.downcase == "table" || parent_table.name.downcase == "html"
+          parent_table = parent_table.parent
+        end
 
-        coupon_link_elem = row.search('span.lp > a').first
-        onclick = coupon_link_elem.get_attribute('onclick')
-        url_match = onclick.match /window.open\('(.*?)'/i
-        link = url_match[1]
+        if parent_table.nil?
+          raise "Unable to process the coupon with description #{coupon_div.inner_text}"
+        else
+          coupon = {}
+          coupon[:description] = parent_table.search('div.couponvalue').first.inner_text
+          coupon[:restrictions] = parent_table.search('div.couponrestriction').first.inner_text
 
-        coupon[:source_url] = "#{ROOT_URL}#{link}"
-        company[:coupons] << coupon
+          coupon_link_elem = parent_table.search('span.lp > a').first
+          onclick = coupon_link_elem.get_attribute('onclick')
+          url_match = onclick.match /window.open\('(.*?)'/i
+          link = url_match[1]
+
+          coupon[:source_url] = "#{ROOT_URL}#{link}"
+          company[:coupons] << coupon
+        end
       rescue Exception => ex
-        puts Helpers.get_error_string("Error retrieving coupon information for company #{company[:name]}", ex)
+        Helpers.instance.write_error("Error processing a coupon for '#{company[:name]}' with description #{coupon_div.inner_text}", ex)
       end
     end
   end

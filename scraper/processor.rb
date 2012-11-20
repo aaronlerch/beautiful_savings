@@ -7,30 +7,23 @@ require 'hpricot'
 
 class Processor
   def process_all
-    categories = {}
-    directory_url = "#{ROOT_URL}Site.Directories.html"
-
     begin
-      category_html = Hpricot(Helpers.instance.sanitize_contents(open(directory_url).read))
+      root_html = Hpricot(Helpers.instance.sanitize_contents(open(ROOT_URL).read))
     rescue Exception => ex
-      abort("Error accessing site directory at #{directory_url}:\n\n#{ex.message}\n\n#{ex.backtrace}")
+      abort("Error accessing coupons4indy.com:\n\n#{ex.message}\n\n#{ex.backtrace}")
     end
 
-    category_html.search('td.dirparcats a').each do |cat_link_html|
-      cat_url = cat_link_html.get_attribute(:href)
-      cat_text = cat_link_html.inner_text
-      categories[cat_text] = cat_url
-    end
+    root_html.search('select.sidedirectorybody').first
 
-    if categories.empty?
-      abort("No categories were found ... that ain't good.")
-    end
+    abort("No global select list! (One can only dream.)") if root_html.nil?
 
-    puts "Processing #{categories.length} categories"
-    #puts "Using category 'Automobile' for TESTING only!!"
-    #categories = { "Automobile" => "Directory-pc13444.11312-Automobile.html" }
-    categories.each do |name, suburl|
-      CompanyProcessor.process_url_of_companies("#{ROOT_URL}#{suburl}", true)
+    root_html.search('option')[0..50].each do |company_option|
+      option_value = company_option.get_attribute(:value)
+      next if option_value.nil? or option_value.empty?
+
+      url = "#{ROOT_URL}#{option_value}"
+      company_name = company_option.inner_text.strip
+      CompanyProcessor.process_company_url_and_name(url, company_name)
     end
   end
 end
