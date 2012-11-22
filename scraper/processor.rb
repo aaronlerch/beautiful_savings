@@ -24,6 +24,9 @@ class Processor
       url = "#{ROOT_URL}#{option_value}"
       company_name = company_option.inner_text.strip
       CompanyProcessor.process_company_url_and_name(url, company_name)
+
+      # Delay for a quarter-second to avoid any spamming rules that might get applied.
+      sleep 0.1
     end
   end
 end

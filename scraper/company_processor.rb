@@ -17,15 +17,15 @@ class CompanyProcessor
       company[:source_url] = url
 
       # Get the link to the coupon page, trying the two variations we've seen
-      coupon_link = company_html.search('div#listing0 a[@href^="coupon"]').first
+      coupon_link = company_html.search('div.cgeyixcacaidb a[@href^="coupon"]').first
 
       if coupon_link.nil? or coupon_link.empty?
-        coupon_link = company_html.search('div#listing0 a[@href^="acctcoupon"]').first
+        coupon_link = company_html.search('div.cgeyixcacaidb a[@href^="acctcoupon"]').first
       end
 
       if coupon_link.nil? or coupon_link.empty?
         # Handle a different case for the URL. Le sigh.
-        coupon_link = company_html.search('div#listing0 a[@href^="AcctCoupon"]').first
+        coupon_link = company_html.search('div.cgeyixcacaidb a[@href^="AcctCoupon"]').first
       end
 
       if !coupon_link.nil? and !coupon_link.empty?
