@@ -25,8 +25,8 @@ class Processor
       company_name = company_option.inner_text.strip
       CompanyProcessor.process_company_url_and_name(url, company_name)
 
-      # Delay for a quarter-second to avoid any spamming rules that might get applied.
-      sleep 0.1
+      # Delay for a moment to avoid any spamming rules that might get applied.
+      sleep 0.5
     end
   end
 end

@@ -11,10 +11,16 @@ start = Time.now
 # Configure the Mongo connection
 Database.configure :development
 
-Database.companies.remove
+# Clear all previous errors
 Database.errors.remove
 
+# Flag all existing companies as stale
+Database.companies.update({}, { "$set" => { "stale" => true } }, { :multi => true })
+
 Processor.new.process_all
+
+# Remove all still-stale companies (meaning they don't exist anymore)
+Database.companies.remove({ "stale" => true })
 
 finish = Time.now
 

@@ -6,9 +6,10 @@ require_relative './helpers.rb'
 
 class CouponProcessor
   def self.process_coupons_for_company(company = {})
-    company[:coupons] = []
-    return [] if !company.has_key? :coupon_list_url
-    url = company[:coupon_list_url]
+    # Clear any existing coupons, we're going to reset these no matter what
+    company["coupons"] = []
+    return [] if !company.has_key?("coupon_list_url")
+    url = company["coupon_list_url"]
     return [] if !Helpers.instance.should_process(url)
     
     page = Hpricot(Helpers.instance.sanitize_contents(open(url).read))
@@ -18,11 +19,11 @@ class CouponProcessor
 
     if coupon_divs.empty?
         doc = {
-          :message => "No coupons found for #{company[:name]}",
-          :url => company[:coupon_list_url]
+          :message => "No coupons found for #{company["name"]}",
+          :url => company["coupon_list_url"]
         }
         Database.errors.insert doc
-        puts "No coupons found for #{company[:name]}!"
+        puts "No coupons found for #{company["name"]}!"
     end
 
     # Some pages have a single coupon, and are structured differently. Process that here.
@@ -31,12 +32,12 @@ class CouponProcessor
     coupon_divs.each do |coupon_div|
       begin
         if is_single_coupon_page
-          company[:coupons] << parse_single_coupon_structure(coupon_div)
+          company["coupons"] << parse_single_coupon_structure(coupon_div)
         else
-          company[:coupons] << parse_multiple_coupon_structure(coupon_div)
+          company["coupons"] << parse_multiple_coupon_structure(coupon_div)
         end
       rescue Exception => ex
-        Helpers.instance.write_error("Error processing a coupon for '#{company[:name]}' with description #{coupon_div.inner_text}", ex)
+        Helpers.instance.write_error("Error processing a coupon for '#{company["name"]}' with description #{coupon_div.inner_text}", ex)
       end
     end
   end
@@ -53,8 +54,8 @@ class CouponProcessor
     raise "Unable to process the coupon with description #{coupon_div.inner_text}" if parent_div.nil?
     
     coupon = {}
-    coupon[:description] = parent_div.search('div.couponvalue').first.inner_text
-    coupon[:restrictions] = parent_div.search('div.couponrestriction').first.inner_text
+    coupon["description"] = parent_div.search('div.couponvalue').first.inner_text
+    coupon["restrictions"] = parent_div.search('div.couponrestriction').first.inner_text
 
     coupon_link_elem = parent_div.search('span.lp > a').first
     raise "Unable to find coupon print link" if coupon_link_elem.nil?
@@ -62,7 +63,7 @@ class CouponProcessor
     url_match = onclick.match /window.open\('(.*?)'/i
     link = url_match[1]
 
-    coupon[:source_url] = "#{ROOT_URL}#{link}"
+    coupon["source_url"] = "#{ROOT_URL}#{link}"
     coupon
   end
 
@@ -76,8 +77,8 @@ class CouponProcessor
     raise "Unable to process the coupon with description #{coupon_div.inner_text}" if parent_table.nil?
     
     coupon = {}
-    coupon[:description] = parent_table.search('div.couponvalue').first.inner_text
-    coupon[:restrictions] = parent_table.search('div.couponrestriction').first.inner_text
+    coupon["description"] = parent_table.search('div.couponvalue').first.inner_text
+    coupon["restrictions"] = parent_table.search('div.couponrestriction').first.inner_text
 
     # Find the current row inside the "lp" table, to use as the root for findind the coupon link
     lp_table_row = parent_table
@@ -97,7 +98,7 @@ class CouponProcessor
     url_match = onclick.match /window.open\('(.*?)'/i
     link = url_match[1]
 
-    coupon[:source_url] = "#{ROOT_URL}#{link}"
+    coupon["source_url"] = "#{ROOT_URL}#{link}"
     coupon
   end
 end

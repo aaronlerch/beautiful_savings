@@ -2,6 +2,7 @@
 
 require 'open-uri'
 require 'hpricot'
+require 'geocoder'
 require_relative './helpers.rb'
 require_relative './coupon_processor.rb'
 require_relative '../database.rb'
@@ -10,11 +11,17 @@ require_relative '../app_helpers.rb'
 class CompanyProcessor
   def self.process_company_url_and_name(url, company_name)
     begin
-      company = {}
       company_html = Hpricot(Helpers.instance.sanitize_contents(open(url).read))
 
-      company[:name] = company_name
-      company[:source_url] = url
+      slug = company_name.to_slug
+
+      # Find an existing company to match
+      company = Database.companies.find_one({ "slug" => slug })
+      company = {} if company.nil?
+
+      company["name"] = company_name
+      company["slug"] = slug
+      company["source_url"] = url
 
       # Get the link to the coupon page, trying the two variations we've seen
       coupon_link = company_html.search('div.cgeyixcacaidb a[@href^="coupon"]').first
@@ -29,43 +36,80 @@ class CompanyProcessor
       end
 
       if !coupon_link.nil? and !coupon_link.empty?
-        company[:coupon_list_url] = "#{ROOT_URL}#{coupon_link.get_attribute(:href)}"
+        company["coupon_list_url"] = "#{ROOT_URL}#{coupon_link.get_attribute(:href)}"
       else
         raise "There is no coupon link for this company"
       end
 
       address_area = company_html.search('span.dirupheader')
       address_items = address_area.search('font')
+
+      has_address = address_items.count >= 2
       
-      if address_items.count > 0
-        company[:full_address] = address_items[0].inner_text.strip
+      if has_address
+        new_company_address = address_items[0].inner_text.strip
+        
+        # Update the address only if it's newly retrieved, or changed,
+        # or if we don't have a lat/lng for the address
+        if !new_company_address.nil? &&
+           (
+             !company.has_key?("full_address") || 
+             (!company.has_key?("lat") && !company.has_key?("lng")) || 
+             company["full_address"] != new_company_address
+           )
+          
+          company["full_address"] = new_company_address
+          company.delete "lat"
+          company.delete "lng"
+
+          # geocode it
+          result = Geocoder.search(new_company_address).first
+          if !result.nil? && result.data.has_key?("geometry") && result.data["geometry"].has_key?("location")
+            company["lat"] = result.data["geometry"]["location"]["lat"]
+            company["lng"] = result.data["geometry"]["location"]["lng"]
+          end
+        end
       end
       
-      if address_items.count > 1
-        company[:phone_number] = address_items[1].inner_text.strip
+      if has_address || address_items.count == 1
+        if has_address
+          company["phone_number"] = address_items[1].inner_text.strip
+        elsif address_items.count == 1
+          company["phone_number"] = address_items[0].inner_text.strip
+        end
       end
       
       description_element = company_html.search('span.dirupheader + div').first
 
       if !description_element.nil?
-        company[:description] = description_element.inner_text.strip
+        company["description"] = description_element.inner_text.strip
       end
-
-      company[:slug] = company[:name].to_slug
       
       CouponProcessor.process_coupons_for_company(company)
 
-      # Try to find an existing company with the same slug - if so,
-      # remove it and insert this one instead - and flag the issue. There
-      # can be a few reasons for this, so it's not terrible, just inefficient.
-      duplicate_count = Database.companies.find("slug" => company[:slug]).count
-      if duplicate_count > 0
-        Database.companies.remove("slug" => company[:slug])
-        Database.errors.insert({ :message => "Duplicate companies with the slug '#{company[:slug]}' were found" })
-        puts "Duplicates found for '#{company[:name]}'"
+      # Build an array with the set of searchable values from:
+      # - description
+      # - each coupon description
+      searchable = []
+      if company.has_key?("description")
+        searchable.concat(company["description"].split)
+      end
+      if company.has_key?("full_address")
+        searchable.concat(company["full_address"].split)
+      end
+      company["coupons"].each do |coupon|
+        searchable.concat(coupon["description"].split)
       end
 
-      Database.companies.insert company
+      searchable.each { |item| item.downcase! }
+      searchable.uniq!
+      company["search"] = searchable
+
+      # Flag this company as not stale anymore
+      company["stale"] = false
+      company["updated_at"] = Time.now
+
+      Database.companies.save company
 
     rescue Exception => ex
       Helpers.instance.write_error "Error retrieving company information for '#{company_name}'", ex, :url => url, :company_name => company_name
