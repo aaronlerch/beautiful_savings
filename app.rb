@@ -1,18 +1,12 @@
 require 'bundler'
 Bundler.require
-require_relative './app_helpers'
+require_relative './database.rb'
 
 class App < Sinatra::Base
   set :root, File.dirname(__FILE__)
 
-  configure :development do
-    Configurator.development
-  end
-
-  configure :production do
-  end
-
   configure do
+    Database.configure :production
   end
 
   helpers do
@@ -20,6 +14,15 @@ class App < Sinatra::Base
 
   get '/' do
     slim :index
+  end
+
+  get '/search' do
+  end
+
+  get '/autocomplete' do
+  end
+
+  get '/company/:slug' do
   end
 
 end

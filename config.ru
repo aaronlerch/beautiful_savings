@@ -1,4 +1,4 @@
-require_relative './app'
+require File.dirname(__FILE__) + "/app.rb"
 
 map "/" do
   run App
