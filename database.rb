@@ -1,16 +1,12 @@
 require 'mongo'
 
 class Database
-  def self.connection
-    @@connection
-  end
-
   def self.companies
-    connection.db(@@database_name).collection("companies")
+    @@connection.db(@@database_name).collection("companies")
   end
 
-  def self.errors
-    connection.db(@@database_name).collection("errors")
+  def self.zip_codes
+    @@connection.db(@@database_name).collection("zip_codes")
   end
 
   def self.configure(env = :development)
@@ -21,6 +17,7 @@ class Database
     end
 
     # Not lazy = bad.
+    # I'm lazy = bad.
     parser = Mongo::URIParser.new uri
     @@connection = parser.connection({})
     @@database_name = uri[%r{/([^/\?]+)(\?|$)}, 1]
