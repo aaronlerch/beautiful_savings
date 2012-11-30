@@ -1,0 +1,14 @@
+doctype html
+html
+  head
+    title
+      | Beautiful Savings :: 
+      - if content_for? :title
+        == yield_content :title
+      - else
+        | Local Indianapolis Coupons that are easy to find
+    /== css :app
+    /== js  :app
+
+  body
+    == yield
