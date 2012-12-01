@@ -121,7 +121,7 @@ Example return result:
   end
 
   get '/search' do
-    redirect(to('/')) if !params[:q]
+    redirect(to('/')) if !params[:q] || params[:q].empty?
     @companies = search
     slim :search
   end
