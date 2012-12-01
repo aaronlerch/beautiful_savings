@@ -1,7 +1,16 @@
 = content_for :title, "Search Results"
 
-| Found stuff:
+h2
+  | Search Results for '
+  = params[:q]
+  | '
 
-- @companies.each do |c|
-  == c
-  br
+- if @companies.nil? || @companies.count == 0
+
+  h3 No Results
+
+- else
+  - @companies.each do |c|
+    .company
+      .name
+        a href="/company/#{c["slug"]}" = c["name"]
