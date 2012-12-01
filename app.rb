@@ -63,10 +63,25 @@ class App < Sinatra::Base
       end
 
       result = options.search_index.search(query, search_options)
+      ids = result["results"].map { |doc| BSON::ObjectId(doc["docid"]) }
+      companies = Database.companies.find({"_id" => { "$in" => ids }})
 =begin
 Example return result:
-
-["matches", "184"]<br />["query", "name:a*^3 OR text:a^1"]<br />["search_time", "0.004"]<br />["results", [{"docid"=>"50b3f78dd7730010f4000025", "query_relevance_score"=>"4508"}, {"docid"=>"50b3f71bd7730010f4000010", "query_relevance_score"=>"4490"}, {"docid"=>"50b3f711d7730010f400000f", "query_relevance_score"=>"4490"}, {"docid"=>"50b3f721d7730010f4000011", "query_relevance_score"=>"4490"}, {"docid"=>"50b3f702d7730010f400000c", "query_relevance_score"=>"4489"}, {"docid"=>"50b3f791d7730010f4000026", "query_relevance_score"=>"4489"}, {"docid"=>"50b3f707d7730010f400000d", "query_relevance_score"=>"4488"}, {"docid"=>"50b3f70bd7730010f400000e", "query_relevance_score"=>"4488"}, {"docid"=>"50b3f6f9d7730010f400000a", "query_relevance_score"=>"4488"}, {"docid"=>"50b3f6fdd7730010f400000b", "query_relevance_score"=>"4488"}]]
+["matches", "184"]
+["query", "name:a*^3 OR text:a^1"]
+["search_time", "0.004"]
+["results", [
+  {"docid"=>"50b3f78dd7730010f4000025", "query_relevance_score"=>"4508"}, 
+  {"docid"=>"50b3f71bd7730010f4000010", "query_relevance_score"=>"4490"}, 
+  {"docid"=>"50b3f711d7730010f400000f", "query_relevance_score"=>"4490"}, 
+  {"docid"=>"50b3f721d7730010f4000011", "query_relevance_score"=>"4490"}, 
+  {"docid"=>"50b3f702d7730010f400000c", "query_relevance_score"=>"4489"}, 
+  {"docid"=>"50b3f791d7730010f4000026", "query_relevance_score"=>"4489"}, 
+  {"docid"=>"50b3f707d7730010f400000d", "query_relevance_score"=>"4488"}, 
+  {"docid"=>"50b3f70bd7730010f400000e", "query_relevance_score"=>"4488"}, 
+  {"docid"=>"50b3f6f9d7730010f400000a", "query_relevance_score"=>"4488"}, 
+  {"docid"=>"50b3f6fdd7730010f400000b", "query_relevance_score"=>"4488"}
+]]
 =end
     end
 
@@ -98,7 +113,11 @@ Example return result:
   end
 
   get '/' do
-    slim :index
+    slim :index, :layout => :home_layout
+  end
+
+  get '/wtf' do
+    slim :about
   end
 
   get '/search' do

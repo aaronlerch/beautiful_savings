@@ -2,11 +2,7 @@ doctype html
 html
   head
     title
-      | Beautiful Savings :: 
-      - if content_for? :title
-        == yield_content :title
-      - else
-        | Local Indianapolis Coupons that are easy to find
+      | Beautiful Savings :: Local Indianapolis Coupons that are easy to find
     link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet"
 
     css:
@@ -24,16 +20,29 @@ html
         margin: 30px 0;
       }
 
+      /* Main message and sign up button */
+      .jumbotron {
+        margin: 60px 0;
+        text-align: center;
+      }
+      .jumbotron h1 {
+        font-size: 72px;
+        line-height: 1;
+      }
+      .jumbotron .btn {
+        font-size: 21px;
+        padding: 14px 24px;
+      }
+      .jumbotron .search-query {
+        font-size: 21px;
+        padding: 14px;
+      }
+      .footer {
+        text-align: center;
+      }
+
   body
     .container-narrow
-      .masthead
-        ul.nav.nav-pills.pull-right
-          li
-            a href="/" Home
-          li
-            a href="/wtf" About
-        h3.muted Beautiful Savings
-
       == yield
 
       .footer
