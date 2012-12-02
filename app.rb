@@ -122,6 +122,10 @@ Example return result:
 
   get '/search' do
     redirect(to('/')) if !params[:q] || params[:q].empty?
+    
+    company = Database.companies.find_one({:name => params[:q]})
+    redirect(to("/company/#{company["slug"]}")) if company
+
     @companies = search
     slim :search
   end
@@ -132,7 +136,7 @@ Example return result:
   end
 
   get '/autocomplete' do
-    halt(400) if !params[:query]
+    halt(400) if !params[:query] || params[:query].empty?
     
     query_regexp = Regexp.new "^#{params[:query].downcase}"
     companies = Database.companies.find({:normalized_name => query_regexp}, 
@@ -142,22 +146,8 @@ Example return result:
       }).to_a
 
     content_type :json
-    result = {
-      :lat => params[:lat],
-      :lng => params[:lng],
-      :query => params[:query],
-      :suggestions => []
-    }
-    
-    return result.to_json if companies.empty?
-    
-    companies.each do |c|
-      result[:suggestions].push({
-        :label => c["name"],
-        :value => "/company/#{c["slug"]}"
-      })
-    end
-    result.to_json
+    results = companies.map { |c| { :name => c["name"], :url => "/company/#{c["slug"]}" } }
+    results.to_json
   end
 
 end

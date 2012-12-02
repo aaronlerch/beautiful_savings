@@ -1,3 +1,20 @@
 = content_for :title, @company["name"]
 
-h2 = @company["name"]
+.row
+  .span4
+    h3.name = @company["name"]
+    .description = @company["description"]
+    .address
+      p = @company["full_address"]
+      .phone
+        a href="callto:#{@company["phone_number"]}" = @company["phone_number"]
+      a href="#" Get Directions
+    .link-home
+      a href="#{@company["source_url"]}" View this company on coupons4indy.com
+  .span3
+    - @company["coupons"].each do |coupon|
+      .coupon
+        .coupon-description = coupon["description"]
+        .coupon-restrictions = coupon["restrictions"]
+        .coupon-print
+          a href="#{coupon["source_url"]}" target="_blank" Print This Coupon
