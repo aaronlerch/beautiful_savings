@@ -27,9 +27,35 @@ html
         padding-top: 100px;
         text-align: center;
       }
-
-    - if content_for? :head
-      == yield_content :head
+      .description {
+        margin-bottom: 25px;
+      }
+      .paging {
+        padding-top: 40px;
+        text-align: center;
+      }
+      .link-home {
+        font-size: 0.8em;
+      }
+      .coupon {
+        border-style: dashed;
+        border-width: 2px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .coupon-description {
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .coupon-restrictions {
+        color: red;
+        font-size: 0.8em;
+        line-height: 1em;
+        margin-bottom: 10px;
+      }
+      .listing-address {
+        margin-top: -10px;
+      }
 
   body
     .container-narrow
@@ -41,7 +67,7 @@ html
             a href="/wtf" About
         form.form-search.pull-right action="/search" method="GET"
           .input-append
-            input.span2.search-query#q name="q" type="text" autocomplete="off"
+            input.span2.search-query#q name="q" type="text" autocomplete="off" value="#{params[:q]}"
             button.btn type="submit" ?
         h3.muted
           a href="/" Beautiful Savings

@@ -1,7 +1,11 @@
 = content_for :title, "Search Results"
 
 h2
-  | Search Results for '
+  - if @matches.to_i > 0
+    | #{@matches}
+  - else
+    | Search
+  |  results for '
   = params[:q]
   | '
 
@@ -12,5 +16,28 @@ h2
 - else
   - @companies.each do |c|
     .company
-      .name
+      h4.name
         a href="/company/#{c["slug"]}" = c["name"]
+      - if c.has_key? "full_address"
+        .listing-address
+          p
+            = c["full_address"]
+            - if distance_to? c
+              br
+              | #{distance_to(c)} miles away
+      - if c.has_key? "coupons"
+        ul.coupons
+          / Print the first 3 available coupons
+          - c["coupons"][0..2].each do |coupon|
+            li
+              a href="#{coupon["source_url"]}" target="_blank"
+                = coupon["description"][0..75]
+                - if coupon["description"].length > 75
+                  | ...
+          - if c["coupons"].count > 3
+            li.more
+              a href="/company/#{c["slug"]}" more coupons...
+
+- if @has_more
+  .paging
+    a.btn.btn-large.btn-inverse href="/search?q=#{params[:q]}&page=#{next_page}&lat=#{params[:lat]}&lng=#{params[:lng]}" More...

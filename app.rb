@@ -18,6 +18,20 @@ class App < Sinatra::Base
   helpers Sinatra::ContentFor2
 
   helpers do
+    def distance_to?(company)
+      params[:lat].to_f != 0 && params[:lng].to_f != 0 && company.has_key?("lat") && company.has_key?("lng")
+    end
+
+    def distance_to(company)
+      from = [params[:lat].to_f, params[:lng].to_f]
+      to = [company["lat"].to_f, company["lng"].to_f]
+      Geocoder::Calculations.distance_between(from, to, { :units => :mi }).round(1)
+    end
+
+    def next_page
+      @page + 2
+    end
+
     def pre_process_query
       return if params[:lat].to_f != 0 and params[:lng].to_f != 0
       matchdata = /\b(\d{5})\b/.match params[:q]
@@ -27,7 +41,6 @@ class App < Sinatra::Base
       return if coords == [0,0]
       params[:lat] = coords[0]
       params[:lng] = coords[1]
-      params[:q] = params[:q].sub zip, ''
     end
 
     def get_zip_coords(zip)
@@ -49,8 +62,10 @@ class App < Sinatra::Base
     def search
       pre_process_query
       query = build_indexden_query params[:q]
+      page = params[:page].to_i
+      page = page - 1 if page > 0
       search_options = { 
-        #:start => page * RESULTS_PAGE_SIZE, 
+        :start => page * options.results_page_size, 
         :len => options.results_page_size, 
         :function => 1
       }
@@ -63,26 +78,12 @@ class App < Sinatra::Base
       end
 
       result = options.search_index.search(query, search_options)
+      matches = result["matches"].to_i
+      offset = (page * options.results_page_size) + result["results"].count
+      has_more = matches != 0 && (offset < matches)
       ids = result["results"].map { |doc| BSON::ObjectId(doc["docid"]) }
-      companies = Database.companies.find({"_id" => { "$in" => ids }})
-=begin
-Example return result:
-["matches", "184"]
-["query", "name:a*^3 OR text:a^1"]
-["search_time", "0.004"]
-["results", [
-  {"docid"=>"50b3f78dd7730010f4000025", "query_relevance_score"=>"4508"}, 
-  {"docid"=>"50b3f71bd7730010f4000010", "query_relevance_score"=>"4490"}, 
-  {"docid"=>"50b3f711d7730010f400000f", "query_relevance_score"=>"4490"}, 
-  {"docid"=>"50b3f721d7730010f4000011", "query_relevance_score"=>"4490"}, 
-  {"docid"=>"50b3f702d7730010f400000c", "query_relevance_score"=>"4489"}, 
-  {"docid"=>"50b3f791d7730010f4000026", "query_relevance_score"=>"4489"}, 
-  {"docid"=>"50b3f707d7730010f400000d", "query_relevance_score"=>"4488"}, 
-  {"docid"=>"50b3f70bd7730010f400000e", "query_relevance_score"=>"4488"}, 
-  {"docid"=>"50b3f6f9d7730010f400000a", "query_relevance_score"=>"4488"}, 
-  {"docid"=>"50b3f6fdd7730010f400000b", "query_relevance_score"=>"4488"}
-]]
-=end
+      companies = Database.companies.find({"_id" => { "$in" => ids }}).to_a
+      [matches, page, has_more, companies]
     end
 
     def build_indexden_query(query)
@@ -126,7 +127,8 @@ Example return result:
     company = Database.companies.find_one({:name => params[:q]})
     redirect(to("/company/#{company["slug"]}")) if company
 
-    @companies = search
+    @matches, @page, @has_more, @companies = search
+    redirect(to("/company/#{@companies[0]["slug"]}")) if @companies.count == 1
     slim :search
   end
 
