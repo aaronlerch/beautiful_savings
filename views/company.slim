@@ -5,18 +5,22 @@
     h3.name = @company["name"]
 .row
   .span4
-    .description = @company["description"]
+    .description
+      markdown:
+        #{@company["description"]}
     .address
       - if @company.has_key? "full_address"
         div
           = @company["full_address"]
         div
-          a href="http://maps.google.com/maps?saddr=#{@company["full_address"].gsub(/\s+/, '+')}" Get Directions
+          a href="http://maps.google.com/maps?saddr=#{@company["full_address"].gsub(/\s+/, '+')}"
+            img.map-icon src="/map-icon.png" border="0"
+            | Get Directions
       - if @company.has_key? "phone_number"
         .phone
           p
-            | Phone: 
-            a href="callto:#{@company["phone_number"]}" = @company["phone_number"]
+            | Phone: #{@company["phone_number"]}
+            /a href="callto:#{@company["phone_number"]}" = @company["phone_number"]
     .link-home
       a href="#{@company["source_url"]}" View this company on coupons4indy.com, if you must.
   .span3
