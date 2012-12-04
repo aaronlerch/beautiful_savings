@@ -13,7 +13,7 @@ class Database
     if env == :development
       uri = "mongodb://localhost/beautiful_savings"
     else
-      uri = ENV['COUPONS5INDY_MONGODB_URI']
+      uri = ENV['BEAUTIFULSAVINGS_MONGODB_URI']
     end
 
     # Not lazy = bad.
