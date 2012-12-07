@@ -36,14 +36,15 @@ class App < Sinatra::Base
     end
 
     def pre_process_query
+      params[:query_to_perform] = params[:q]
       return if params[:lat].to_f != 0 and params[:lng].to_f != 0
       matchdata = /\b(\d{5})\b/.match params[:q]
       return if !matchdata || !matchdata.captures.any?
       zip = matchdata.captures[0]
       coords = get_zip_coords zip
       return if coords == [0,0]
-      params[:lat] = coords[0]
-      params[:lng] = coords[1]
+      params[:lat], params[:lng] = coords
+      params[:query_to_perform] = params[:q].gsub(zip, '')
     end
 
     def get_zip_coords(zip)
@@ -64,7 +65,7 @@ class App < Sinatra::Base
 
     def search
       pre_process_query
-      query = build_indexden_query params[:q]
+      query = build_indexden_query params[:query_to_perform]
       page = params[:page].to_i
       page = page - 1 if page > 0
       search_options = { 
