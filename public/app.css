@@ -1,0 +1,71 @@
+body {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+/* Custom container */
+.container-narrow {
+  margin: 0 auto;
+  max-width: 700px;
+}
+.container-narrow > hr {
+  margin: 30px 0;
+}
+.jumbotron {
+  margin: 60px 0;
+  text-align: center;
+}
+.jumbotron h1 {
+  font-size: 72px;
+  line-height: 1;
+}
+.jumbotron .btn {
+  font-size: 21px;
+  padding: 14px 24px;
+}
+.jumbotron .search-query {
+  font-size: 21px;
+  padding: 14px;
+}
+.footer {
+  padding-top: 100px;
+  text-align: center;
+}
+.description {
+  margin-bottom: 25px;
+}
+.company {
+  border-bottom: 1px solid #ddd;
+}
+.paging {
+  padding-top: 40px;
+  text-align: center;
+}
+.link-home {
+  font-size: 0.8em;
+}
+.coupon {
+  border-style: dashed;
+  border-width: 2px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.coupon-description {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.coupon-restrictions {
+  color: red;
+  font-size: 0.8em;
+  line-height: 1em;
+  margin-bottom: 10px;
+}
+.listing-address {
+  margin-top: -10px;
+}
+.address {
+  font-size: 1.2em;
+}
+img.map-icon {
+  margin-right: 10px;
+}

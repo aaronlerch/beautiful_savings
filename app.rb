@@ -113,6 +113,10 @@ class App < Sinatra::Base
     end
   end
 
+  not_found do
+    slim :oops
+  end
+
   get '/' do
     slim :index, :layout => :home_layout
   end
@@ -134,6 +138,7 @@ class App < Sinatra::Base
 
   get '/company/:slug' do
     @company = Database.companies.find_one({:slug => params[:slug]})
+    halt(404) if @company.nil?
     slim :company
   end
 

@@ -1,0 +1,9 @@
+= content_for :title, "Not Found"
+
+.jumbotron
+  h2 Sorry, we don't know about that.
+  p Try searching!
+  form.form-search action="/search" method="GET"
+      .input-append
+        input.span6.search-query#q name="q" type="text" autocomplete="off"
+        button.btn type="submit" Search

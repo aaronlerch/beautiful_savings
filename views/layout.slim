@@ -8,63 +8,7 @@ html
       - else
         | Local Indianapolis Coupons that are easy to find
     link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet"
-
-    css:
-      body {
-        padding-top: 20px;
-        padding-bottom: 40px;
-      }
-
-      /* Custom container */
-      .container-narrow {
-        margin: 0 auto;
-        max-width: 700px;
-      }
-      .container-narrow > hr {
-        margin: 30px 0;
-      }
-      .footer {
-        padding-top: 100px;
-        text-align: center;
-      }
-      .description {
-        margin-bottom: 25px;
-      }
-      .company {
-        border-bottom: 1px solid #ddd;
-      }
-      .paging {
-        padding-top: 40px;
-        text-align: center;
-      }
-      .link-home {
-        font-size: 0.8em;
-      }
-      .coupon {
-        border-style: dashed;
-        border-width: 2px;
-        padding: 20px;
-        margin-bottom: 20px;
-      }
-      .coupon-description {
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-      .coupon-restrictions {
-        color: red;
-        font-size: 0.8em;
-        line-height: 1em;
-        margin-bottom: 10px;
-      }
-      .listing-address {
-        margin-top: -10px;
-      }
-      .address {
-        font-size: 1.2em;
-      }
-      img.map-icon {
-        margin-right: 10px;
-      }
+    link href="/app.css" rel="stylesheet"
 
   body
     .container-narrow
@@ -74,9 +18,9 @@ html
             a href="/" Home
           li
             a href="/wtf" About
-        form.form-search.pull-right action="/search" method="GET"
+        form.pull-right action="/search" method="GET"
           .input-append
-            input.span2.search-query#q name="q" type="text" autocomplete="off" value="#{params[:q]}"
+            input.span2#q name="q" type="text" autocomplete="off" value="#{params[:q]}"
             button.btn type="submit" Search
         h3.muted
           a href="/" Beautiful Savings
