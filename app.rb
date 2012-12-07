@@ -2,11 +2,14 @@ require 'bundler'
 Bundler.require
 require 'shellwords'
 require 'sinatra/content_for2'
+require 'sinatra/flash'
 require_relative './database.rb'
 
 class App < Sinatra::Base
   set :root, File.dirname(__FILE__)
   set :results_page_size, 10
+  enable :sessions
+  register Sinatra::Flash
 
   configure do
     Database.configure :production
@@ -128,11 +131,18 @@ class App < Sinatra::Base
   get '/search' do
     redirect(to('/')) if !params[:q] || params[:q].empty?
     
-    company = Database.companies.find_one({:name => params[:q]})
-    redirect(to("/company/#{company["slug"]}")) if company
+    company = Database.companies.find_one({:normalized_name => params[:q].downcase})
+    if company
+      flash[:info] = "We found a company with that exact name!"
+      redirect(to("/company/#{company["slug"]}"))
+    end
 
     @matches, @page, @has_more, @companies = search
-    redirect(to("/company/#{@companies[0]["slug"]}")) if @companies.count == 1
+    if @companies.count == 1
+      flash[:info] = "There was exactly one match to your search - this one!"
+      redirect(to("/company/#{@companies[0]["slug"]}"))
+    end
+
     slim :search
   end
 

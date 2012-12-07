@@ -25,6 +25,11 @@ html
         h3.muted
           a href="/" Beautiful Savings
 
+      - if flash[:info]
+        .alert.alert-info
+          button.close type="button" data-dismiss="alert" x
+          = flash[:info]
+
       == yield
 
       .footer
