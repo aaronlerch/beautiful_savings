@@ -1,4 +1,5 @@
 .jumbotron
+  img src="https://s3.amazonaws.com/beautifulsavings/assets/logo.png"
   h1 Beautiful Savings
   p.lead Discover Indianapolis coupons
 
@@ -6,3 +7,19 @@
     .input-append
       input.span6.search-query#q name="q" type="text" autocomplete="off"
       button.btn type="submit" Search
+
+  p
+    | Popular searches: 
+    a href="/search?q=food" food
+    | , 
+    a href="/search?q=mexican" mexican
+    | , 
+    a href="/search?q=pizza" pizza
+    | , 
+    a href="/search?q=greenwood" greenwood
+    br
+    span style="color: #888;"
+      | Add your zip code to any search to get approximate distances.
+      br
+      | Example: 
+      a href="/search?q=food+46204" 'food 46204'

@@ -69,8 +69,8 @@ class App < Sinatra::Base
       page = params[:page].to_i
       page = page - 1 if page > 0
       search_options = { 
-        :start => page * options.results_page_size, 
-        :len => options.results_page_size, 
+        :start => page * settings.results_page_size, 
+        :len => settings.results_page_size, 
         :function => 1
       }
 
@@ -81,9 +81,9 @@ class App < Sinatra::Base
         search_options[:function] = 2
       end
 
-      result = options.search_index.search(query, search_options)
+      result = settings.search_index.search(query, search_options)
       matches = result["matches"].to_i
-      offset = (page * options.results_page_size) + result["results"].count
+      offset = (page * settings.results_page_size) + result["results"].count
       has_more = matches != 0 && (offset < matches)
       ids = result["results"].map { |doc| BSON::ObjectId(doc["docid"]) }
       companies = Database.companies.find({"_id" => { "$in" => ids }}).to_a
